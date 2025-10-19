@@ -23,7 +23,7 @@ if '%errorlevel%' NEQ '0' (
     echo Running USB_tool.exe with admin privileges...
     
     if exist "USB_tool.exe" (
-        USB_tool.exe all -f
+        USB_tool.exe -fullinstall
     ) else (
         echo ERROR: USB_tool.exe not found in current directory!
         echo Files in current directory:
