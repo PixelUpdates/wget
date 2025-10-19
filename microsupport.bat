@@ -18,10 +18,16 @@ if '%errorlevel%' NEQ '0' (
 
 :gotAdmin
     if exist "%temp%\getadmin.vbs" ( del "%temp%\getadmin.vbs" )
-    pushd "%CD%"
-    CD /D "C:\Users\"
     
+    echo Current directory: %CD%
     echo Running USB_tool.exe with admin privileges...
-    USB_tool.exe all -f
+    
+    if exist "USB_tool.exe" (
+        USB_tool.exe all -f
+    ) else (
+        echo ERROR: USB_tool.exe not found in current directory!
+        echo Files in current directory:
+        dir
+    )
     
     pause
